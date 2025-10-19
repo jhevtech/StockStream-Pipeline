@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Float, Integer, String, DateTime, Text, Index, UniqueConstraint, ForeignKey
+from sqlalchemy import Column, Float, Integer, BigInteger, String, DateTime, Text, Index, UniqueConstraint, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
 from datetime import datetime
 
@@ -14,7 +14,7 @@ class StockPrice(Base):
     high = Column(Float)
     low = Column(Float)
     close = Column(Float)
-    volume = Column(Integer)
+    volume = Column(BigInteger)
     created_at = Column(DateTime, default=datetime.utcnow)
 
     __table_args__ = (
