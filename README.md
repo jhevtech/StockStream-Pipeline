@@ -31,9 +31,11 @@ A production-ready ETL pipeline that:
 - `auto_pipeline.py` - Continuous automation
 
 ## Demo
-<p>Here is a short demo showcasing the primary features and capabilities of 
-   using the data from the pipeline.</p>
-![Demo Preview](media/demo.gif)
+Here is a short demo showcasing the primary features and capabilities of using the data from the pipeline:
+
+![Demo Preview](https://github.com/jhevtech/StockStream-Pipeline/raw/main/media/demo.gif)
+
+
 
 
 
