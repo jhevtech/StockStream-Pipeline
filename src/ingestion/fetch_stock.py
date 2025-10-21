@@ -31,7 +31,7 @@ def fetch_stock_data():
             stock = yf.Ticker(ticker)
             data = stock.history(period='5d', interval='1h') #get 5 day with hourly
 
-            inserted += inserted
+            #inserted += 1
             logging.info(f"Success: {ticker} - {inserted} records")
 
             if data.empty:
@@ -63,7 +63,7 @@ def fetch_stock_data():
                     inserted += 1
 
                     session.commit()
-                    print("Data saved to database!")
+                    #print("Data saved to database!")
             print("Successfully inserted into database")
 
         except Exception as e:
@@ -72,7 +72,7 @@ def fetch_stock_data():
             logging.error(f"Failed: {ticker} - {e}")
             session.rollback()
 
-    total_inserted = int(inserted / 35)
+    total_inserted = len(stocks) - total_errors
     success_rate = (len(stocks) - total_errors) / len(stocks) * 100
     logging.info(f"Pipeline Completed - Total: {total_inserted}, Errors: {total_errors}, Success Rate: {success_rate}%")
     print(f"Total inserted: {total_inserted}, \nErrors: {total_errors}, \nSuccess Rate: {success_rate:.1f}%")
@@ -80,4 +80,3 @@ def fetch_stock_data():
     
 if __name__ == "__main__":
     fetch_stock_data()
-

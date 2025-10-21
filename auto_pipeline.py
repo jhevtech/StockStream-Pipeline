@@ -12,13 +12,13 @@ def auto_pipeline():
 
             try: 
                 fetch_stock_data()
-                print("Success! Next run in 15 minutes...")
+                print("Success! Next run in 5 minutes...")
             except Exception as e:
                 print(f"Pipeline error: {e}")
-                print("Retrying in 15 minutes...")
+                print("Retrying in 5 minutes...")
 
-            #timer to wait 15 minutes
-            time.sleep(900)
+            #timer to wait 5 minutes
+            time.sleep(300)
 
     except KeyboardInterrupt:
         print("\n Pipeline stopped by user")
