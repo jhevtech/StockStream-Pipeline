@@ -29,3 +29,13 @@ A production-ready ETL pipeline that:
 - `src/dashboard/` - Streamlit visualization
 - `run_pipeline.py` - Single execution
 - `auto_pipeline.py` - Continuous automation
+
+## Demo
+Here is a short demo showcasing the primary features and capabilities of using the data from the pipeline:
+
+![Demo Preview](https://github.com/jhevtech/StockStream-Pipeline/raw/main/media/demo.gif)
+
+
+
+
+
