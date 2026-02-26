@@ -8,6 +8,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from database.connection import get_session
 from database.models import StockPrice
+from analysis.dsp import butterworth_filter, compute_fft, dsp_forecast
 
 # Page config
 st.set_page_config(
@@ -51,6 +52,9 @@ def get_stock_data(ticker):
     df = pd.DataFrame(data)
     return df.sort_values('timestamp') if not df.empty else df
 
+
+
+
 @st.cache_data(ttl=300)
 def get_all_tickers():
     """Get list of all available tickers"""
@@ -84,7 +88,7 @@ if not tickers:
 with st.sidebar:
     st.header("Stock Selection")
     selected_ticker = st.selectbox("Choose a stock:", tickers)
-    
+
     st.divider()
     
     if st.button("🔄 Refresh Data", use_container_width=True):
@@ -97,6 +101,7 @@ df = get_stock_data(selected_ticker)
 if df.empty:
     st.warning(f"No data found for {selected_ticker}")
     st.stop()
+
 
 # Calculate metrics
 change, change_pct = calculate_change(df)
@@ -197,3 +202,84 @@ st.dataframe(
 # Footer
 st.divider()
 st.caption(f"Last updated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | Total records: {len(df)}")
+
+
+# -----------------------------
+# MAIN DASHBOARD UI
+# -----------------------------
+
+st.title("📈 StockStream DSP Dashboard")
+
+# User selects a ticker
+ticker = st.text_input("Enter a ticker symbol:", "AAPL")
+
+# Load data
+df = get_stock_data(ticker)
+
+if df.empty:
+    st.warning("No data found for this ticker.")
+else:
+    # -----------------------------
+    # DSP PROCESSING
+    # -----------------------------
+    df['filtered'] = butterworth_filter(df['close'])
+    freqs, magnitude = compute_fft(df['close'])
+    forecast = dsp_forecast(df['filtered'])
+
+    # -----------------------------
+    # SUMMARY 
+    #------------------------------
+    if not df.empty:
+        last_close = df['close'].iloc[-1]
+        last_filtered = df['filtered'].iloc[-1]
+        next_forecast = forecast.iloc[0] if len(forecast) > 0 else None
+
+    # Trend deltas 
+        filtered_delta = last_filtered - last_close 
+        forecast_delta = next_forecast - last_filtered if next_forecast else None
+
+        st.markdown("### 📌 Summary")
+
+        col1, col2, col3 = st.columns(3)
+
+        with col1:
+            st.metric(
+                label="Last Close Price",
+                value=f"${last_close:.2f}"
+            )
+
+        with col2:
+            st.metric(
+                label="Filtered Close (DSP)",
+                value=f"${last_filtered:.2f}",
+                delta=f"{filtered_delta:+.2f}"
+            )
+
+        with col3:
+            st.metric(
+                label="Next Forecasted Price",
+                value=f"${next_forecast:.2f}" if next_forecast else "N/A",
+                delta=f"{forecast_delta:+.2f}" if forecast_delta else None
+            )
+
+
+    # -----------------------------
+    # VISUALIZATIONS
+    # -----------------------------
+
+    # Raw vs Filtered
+    st.subheader("Raw vs Filtered Close Price")
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(x=df['timestamp'], y=df['close'], name='Raw Close'))
+    fig.add_trace(go.Scatter(x=df['timestamp'], y=df['filtered'], name='Filtered Close'))
+    st.plotly_chart(fig, use_container_width=True)
+
+    # FFT
+    st.subheader("Frequency Spectrum (FFT)")
+    fft_fig = go.Figure()
+    fft_fig.add_trace(go.Scatter(x=freqs, y=magnitude, name='FFT Magnitude'))
+    st.plotly_chart(fft_fig, use_container_width=True)
+
+    # Forecast
+    st.subheader("DSP Forecast (Next Hour)")
+    st.write(forecast)
